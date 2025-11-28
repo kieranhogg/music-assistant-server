@@ -190,22 +190,35 @@ class BBCSoundsProvider(MusicProvider):
 
         # If we have an account, authenticate. Testing shows all features work without auth
         # but BBC will be disabling BBC Sounds from outside the UK at some point
-        if self.config.get_value(CONF_USERNAME) and self.config.get_value(CONF_PASSWORD):
+        username = self.config.get_value(CONF_USERNAME)
+        password = self.config.get_value(CONF_PASSWORD)
+        if username and password:
+            self.logger.debug("Authenticating BBC Sounds provider")
             if self.client.auth.is_logged_in:
                 # Check if we need to reauth
                 try:
                     await self.client.personal.get_experience_menu()
+                    self.logger.debug("Existing session is valid")
                     return
                 except (exceptions.UnauthorisedError, exceptions.APIResponseError):
+                    self.logger.debug("Existing session is invalid, renewing")
                     await self.client.auth.renew_session()
-
-            try:
-                await self.client.auth.authenticate(
-                    username=str(self.config.get_value(CONF_USERNAME)),
-                    password=str(self.config.get_value(CONF_PASSWORD)),
-                )
-            except exceptions.LoginFailedError as e:
-                raise LoginFailed(e)
+                    self.logger.debug("Session renewed")
+            else:
+                try:
+                    self.logger.debug("Not logged in, performing login")
+                    await self.client.auth.authenticate(
+                        username=str(self.config.get_value(CONF_USERNAME)),
+                        password=str(self.config.get_value(CONF_PASSWORD)),
+                    )
+                    self.logger.debug("Login successful")
+                except exceptions.LoginFailedError as e:
+                    self.logger.error(f"Login failed: {e}")
+                    raise LoginFailed(e)
+        elif self.client.auth.is_logged_in and not (username and password):
+            # Have previously been logged in, but no credentials now so log out
+            self.logger.debug("Previous session found but no credentials, logging out")
+            self.client.auth.logout()
 
     async def loaded_in_mass(self) -> None:
         """Do post-loaded actions."""
