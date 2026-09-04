@@ -292,8 +292,13 @@ class StationConverter(BaseConverter):
             return self._convert_live_station(source_obj)
         if isinstance(source_obj, StationSearchResult):
             return self._convert_station_search_result(source_obj)
-        self.logger.error(f"Failed to convert station {type(source_obj)}: {source_obj}")
-        raise ConversionError(f"Failed to convert station {type(source_obj)}: {source_obj}")
+        msg = (
+            "Failed to convert station %s.%s: %s",
+            type(source_obj).__module__,
+            type(source_obj).__name__,
+        )
+        self.logger.error(msg)
+        raise ConversionError(msg)
 
     def _convert_station(self, station: Station) -> Radio:
         """Convert Station object."""
@@ -473,8 +478,13 @@ class PodcastConverter(BaseConverter):
             return await self._convert_radio_show(source_obj)
         if isinstance(source_obj, RadioClip) or self.context.force_type is Track:
             return await self._convert_radio_clip(source_obj)
-        self.logger.error(f"Failed to convert podcast object {type(source_obj)}: {source_obj}")
-        raise ConversionError(f"Browse conversion failed: {source_obj}")
+        msg = (
+            "PodcastConverter failed to convert podcast object %s.%s",
+            type(source_obj).__module__,
+            type(source_obj).__name__,
+        )
+        self.logger.error(msg)
+        raise ConversionError(msg)
 
     async def _convert_podcast(self, podcast: Podcast | RadioSeries) -> MAPodcast:
         name = self._get_attr(podcast, "titles.primary") or self._get_attr(podcast, "title")
@@ -653,8 +663,13 @@ class BrowseConverter(BaseConverter):
             return self._convert_schedule(source_obj)
         if isinstance(source_obj, RecommendedMenuItem):
             return await self._convert_recommended_item(source_obj)
-        self.logger.error(f"Failed to convert browse object {type(source_obj)}: {source_obj}")
-        raise ConversionError(f"Browse conversion failed: {source_obj}")
+        msg = (
+            "BrowseConverter failed to convert object %s.%s",
+            type(source_obj).__module__,
+            type(source_obj).__name__,
+        )
+        self.logger.error(msg)
+        raise ConversionError(msg)
 
     def _convert_menu_item(self, item: MenuItem) -> BrowseFolder | RecommendationFolder:
         """Convert MenuItem to BrowseFolder or RecommendationFolder."""
@@ -815,15 +830,16 @@ class Adaptor:
                 try:
                     stream_details = await converter.get_stream_details(source_obj)
                 except AttributeError as e:
-                    self.logger.error(f"Error converting object: {e!s}")
+                    self.logger.error("Error converting object: %s", e)
                     return None
                 self.provider.logger.debug(
-                    f"Successfully converted {type(source_obj).__name__}"
-                    f" to {type(stream_details).__name__}"
+                    "Successfully converted %s to %s",
+                    type(source_obj).__name__,
+                    type(stream_details).__name__,
                 )
                 return stream_details
         self.provider.logger.warning(
-            f"No stream converter found for type {type(source_obj).__name__}"
+            "No stream converter found for type %s", type(source_obj).__name__
         )
         return None
 
@@ -875,12 +891,14 @@ class Adaptor:
             BrowseConverter(context),
         ]
         for converter in converters:
-            self.logger.debug(f"Checking if converter {converter} can convert {type(source_obj)}")
+            self.logger.debug(
+                "Checking if converter %s can convert %s", converter, str(type(source_obj))
+            )
             if converter.can_convert(source_obj):
                 try:
                     result = await converter.convert(source_obj)
                 except AttributeError as e:
-                    self.logger.error(f"Error converting object: {e!s}")
+                    self.logger.error("Error converting object: %s", e)
                     return None
                 if context.force_type:
                     assert type(result) is context.force_type, (
@@ -888,12 +906,21 @@ class Adaptor:
                         f"using {type(converter)}"
                     )
                 self.provider.logger.debug(
-                    f"Successfully converted {type(source_obj).__name__}"
-                    f" to {type(result).__name__} {result}"
+                    "Successfully converted %s to %s %s",
+                    type(source_obj).__name__,
+                    type(result).__name__,
+                    result,
                 )
                 return result
-            self.logger.debug(f"Converter {converter} could not convert {type(source_obj)}")
+            self.logger.debug(
+                "Converter %s could not convert %s.%s",
+                converter,
+                type(source_obj).__module,
+                type(source_obj).__name,
+            )
 
-        self.logger.warning(f"No converter found for type {type(source_obj).__name__}")
+        self.logger.warning(
+            "No converter found for type %s.%s", type(source_obj).__module, type(source_obj).__name
+        )
         self.logger.debug(str(source_obj))
         return None
