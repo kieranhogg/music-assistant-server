@@ -26,8 +26,12 @@ class _Constants:
     LATEST_NEWS_PLAYLIST_SUFFIX = "latest_playables_for_curation"
 
 
-class ValidMenuIDs(StrEnum):
-    """Expected main menu IDs from the API / library."""
+class MenuIDs(StrEnum):
+    """
+    Expected main menu IDs from the API / library.
+
+    Used both in the browse() code, as well as for icon lookup.
+    """
 
     LISTEN_LIVE = auto()
     CONTINUE_LISTENING = auto()
@@ -44,3 +48,4 @@ class ValidMenuIDs(StrEnum):
     EXPLORE = auto()
     STATIONS = auto()
     NEWS = auto()
+    PLAYLISTS = auto()

@@ -51,7 +51,7 @@ from music_assistant.models import ProviderInstanceType
 from music_assistant.models.music_provider import MusicProvider
 from music_assistant.models.recommendation_payload import RecommendationPayloadMixin
 from music_assistant.providers.bbc_sounds.adaptor import Adaptor
-from music_assistant.providers.bbc_sounds.constants import ValidMenuIDs, _Constants
+from music_assistant.providers.bbc_sounds.constants import MenuIDs, _Constants
 from music_assistant.providers.bbc_sounds.metadata import (
     _find_segment,
     _segment_to_metadata,
@@ -278,23 +278,22 @@ class BBCSoundsProvider(RecommendationPayloadMixin, MusicProvider):
         ]
         dispatch_menu = path_parts[1] if len(path_parts) > 1 else ""
 
-        if dispatch_menu == "listen_live":
+        if dispatch_menu == MenuIDs.LISTEN_LIVE:
             return await self._browse_live()
-        if dispatch_menu == "categories":
+        if dispatch_menu == MenuIDs.CATEGORIES:
             return await self._browse_categories(path_parts)
-        if dispatch_menu == "collections":
+        if dispatch_menu == MenuIDs.COLLECTIONS:
             return await self._browse_collections(path_parts)
-        if dispatch_menu == "stations":
+        if dispatch_menu == MenuIDs.STATIONS:
             return await self._browse_stations(path_parts)
-        if dispatch_menu == "playlists":
+        if dispatch_menu == MenuIDs.PLAYLISTS:
             if len(path_parts) < 3:
                 raise KeyError("Invalid subpath")
             return await self._get_playlist(path_parts[2])
-        if (
-            dispatch_menu != ""
-            and dispatch_menu not in ValidMenuIDs
-            and _Constants.LATEST_NEWS_PLAYLIST_SUFFIX not in dispatch_menu
-        ):
+        if not self.menu:
+            await self._get_menu()
+        assert self.menu is not None
+        if dispatch_menu != "" and not self.menu.get(dispatch_menu):
             raise KeyError("Invalid subpath")
         return await self._browse_menu(path_parts)
 

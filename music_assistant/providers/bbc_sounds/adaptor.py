@@ -51,7 +51,7 @@ from sounds.models import (
 import music_assistant.helpers.datetime as dt
 from music_assistant.constants import VERBOSE_LOG_LEVEL
 from music_assistant.helpers.datetime import LOCAL_TIMEZONE
-from music_assistant.providers.bbc_sounds.constants import ValidMenuIDs, _Constants
+from music_assistant.providers.bbc_sounds.constants import MenuIDs, _Constants
 
 if TYPE_CHECKING:
     from music_assistant.providers.bbc_sounds import BBCSoundsProvider
@@ -93,21 +93,21 @@ class ImageProvider:
     )
 
     ICON_MAPPING: ClassVar[dict[str, str]] = {
-        ValidMenuIDs.LISTEN_LIVE: "listen_live",
-        ValidMenuIDs.CONTINUE_LISTENING: "continue",
-        ValidMenuIDs.EDITORIAL_COLLECTION: "editorial",
-        ValidMenuIDs.LOCAL_RAIL: "my_location",
-        ValidMenuIDs.SINGLE_ITEM_PROMO: "featured",
-        ValidMenuIDs.COLLECTIONS: "collections",
-        ValidMenuIDs.CATEGORIES: "categories",
-        ValidMenuIDs.RECOMMENDATIONS: "my_sounds",
-        ValidMenuIDs.UNMISSABLE_SPEECH: "speech",
-        ValidMenuIDs.PODCASTS: "speech",
-        ValidMenuIDs.UNMISSABLE_MUSIC: "music",
-        ValidMenuIDs.MUSIC: "music",
-        ValidMenuIDs.EXPLORE: "categories",
-        ValidMenuIDs.STATIONS: "latest",
-        ValidMenuIDs.NEWS: "news",
+        MenuIDs.LISTEN_LIVE: "listen_live",
+        MenuIDs.CONTINUE_LISTENING: "continue",
+        MenuIDs.EDITORIAL_COLLECTION: "editorial",
+        MenuIDs.LOCAL_RAIL: "my_location",
+        MenuIDs.SINGLE_ITEM_PROMO: "featured",
+        MenuIDs.COLLECTIONS: "collections",
+        MenuIDs.CATEGORIES: "categories",
+        MenuIDs.RECOMMENDATIONS: "my_sounds",
+        MenuIDs.UNMISSABLE_SPEECH: "speech",
+        MenuIDs.PODCASTS: "speech",
+        MenuIDs.UNMISSABLE_MUSIC: "music",
+        MenuIDs.MUSIC: "music",
+        MenuIDs.EXPLORE: "categories",
+        MenuIDs.STATIONS: "latest",
+        MenuIDs.NEWS: "news",
     }
 
     @classmethod
