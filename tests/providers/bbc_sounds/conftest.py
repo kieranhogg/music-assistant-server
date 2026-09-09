@@ -59,7 +59,11 @@ def uk_menu() -> Menu:
             MenuItem(id="stations", title="Station & Schedules"),
             MenuItem(id="continue_listening", title="Continue Listening"),
             MenuItem(id="latest_playables_for_curation_lllll", title="Latest News Playlist"),
-            MenuItem(id="editorial_collection", title="Editor's Picks"),
+            MenuItem(
+                id="editorial_collection",
+                title="Editor's Picks",
+                sub_items=[MenuItem(id="editorial1", title="Editorial1")],
+            ),
             MenuItem(id="local_rail", title="From Your Area"),
             MenuItem(id="collections", title="Collections"),
             MenuItem(id="categories", title="Categories"),

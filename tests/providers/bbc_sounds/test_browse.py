@@ -1,11 +1,15 @@
 """Tests for the path browsing functionality of the BBC Sounds provider."""
 
+from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock
 
 import pytest
 from music_assistant_models.errors import MusicAssistantError
 
 from music_assistant.providers.bbc_sounds import BBCSoundsProvider
+
+if TYPE_CHECKING:
+    from sounds.models import Menu
 
 
 @pytest.fixture
@@ -133,9 +137,10 @@ class TestBrowse:
             await provider.browse(incorrect_provider_domain)
 
     async def test_invalid_collection_strings(
-        self, provider: BBCSoundsProvider, invalid_paths: str
+        self, provider: BBCSoundsProvider, invalid_paths: str, uk_menu: Menu
     ) -> None:
         """Test invalid dispatch paths raise an exception."""
+        provider.menu = uk_menu
         with pytest.raises(KeyError, match="Invalid subpath"):
             await provider.browse(invalid_paths)
 
@@ -150,3 +155,33 @@ class TestBrowse:
         provider._get_playlist = AsyncMock()  # type: ignore[method-assign]
         await provider.browse(f"{provider_domain}playlists/pid")
         provider._get_playlist.assert_awaited_once_with("pid")
+
+    async def test_menu_id_in_menu_is_browsable(
+        self, provider: BBCSoundsProvider, provider_domain: str, uk_menu: Menu
+    ) -> None:
+        """
+        Test that a menu ID is browsed correctly.
+
+        Check a given menu ID that is present in the loaded menu, but is not part of a
+        specific dispatch branch is able to be browsed.
+        """
+        provider.menu = uk_menu
+        try:
+            await provider.browse(f"{provider_domain}editorial_collection")
+        except KeyError:
+            raise AssertionError("editorial_collection raised KeyError")
+
+    async def test_nested_menu_id_in_menu_is_browsable(
+        self, provider: BBCSoundsProvider, provider_domain: str, uk_menu: Menu
+    ) -> None:
+        """
+        Test that a nested menu ID is browsed correctly.
+
+        Check a given nested menu ID that is present in the loaded menu, but is not part of a
+        specific dispatch branch is able to be browsed.
+        """
+        provider.menu = uk_menu
+        try:
+            await provider.browse(f"{provider_domain}editorial_collection/editorial1")
+        except KeyError:
+            raise AssertionError("editorial_collection raised KeyError")
